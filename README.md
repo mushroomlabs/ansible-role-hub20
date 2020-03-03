@@ -50,7 +50,7 @@ Role Variables
  - `hub20_user_name`: (default _hub20_)
  - `hub20_user_home_path`: (default _/srv/hub20_)
  - `hub20_web3_provider_uri`: (default _http://localhost:8545_)
- - `hub20_tracked_tokens`: default (_[ETH, WETH]_)
+ - `hub20_tracked_tokens`: list of token addresses (as hex strings) that will be used/accepted as currency by the stores. (default: addresses for ETH, WETH, DAI and RDN)
  - `hub20_application_static_folder_path`: (default _/srv/hub20/static__)
  - `hub20_broker_url`: (default _redis://localhost:6379/0_)
  - `hub20_cache_url`:  (default _redis://localhost:6379/1_)

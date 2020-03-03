@@ -19,7 +19,7 @@
     name: "{{ hub20_pip_package_name }}"
     state: "{{ hub20_pip_package_state }}"
     extra_args: "{{ hub20_pip_extra_arguments | default('') }}"
-    
+
 - name: write environment file
   tags: hub20, environment
   template:
@@ -37,6 +37,7 @@
       pre_start_commands:
         - "{{ hub20_run_virtualenv_path }}/bin/django-admin migrate"
         - "{{ hub20_run_virtualenv_path }}/bin/django-admin collectstatic --noinput"
+        - "{{ hub20_run_virtualenv_path }}/bin/django-admin load_tracked_tokens"
       main_process: "{{ hub20_run_virtualenv_path }}/bin/uvicorn hub20.api.routing:application --env-file {{ hub20_environment_file_path }} --port {{ hub20_application_port }} --host {{ hub20_application_host }}"
   when: hub20_service_web_enabled
 

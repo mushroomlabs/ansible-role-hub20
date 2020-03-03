@@ -18,12 +18,11 @@ galaxy_info:
       versions:
         - bionic
         - cosmic
-        - disco dingo
         - eoan
     
 
   galaxy_tags:
     - hub20    
     - ethereum
-    - raiden-network
+    - raidennetwork
     

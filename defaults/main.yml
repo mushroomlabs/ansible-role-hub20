@@ -26,8 +26,10 @@ hub20_user_name: hub20
 hub20_user_home_path: /srv/hub20
 hub20_web3_provider_uri: http://localhost:8545
 hub20_tracked_tokens:
-  - ETH
-  - WETH
+  - "0x0000000000000000000000000000000000000000"  # ETH
+  - "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"  # WETH
+  - "0x255aa6df07540cb5d3d297f0d0d4d84cb52bc8e6"  # RDN
+  - "0x6b175474e89094c44da98b954eedeac495271d0f"  # Multi-Collateral DAI
 
 hub20_application_static_folder_path: "{{ hub20_user_home_path }}/static"
 hub20_broker_url: "redis://{{ hub20_redis_host }}:{{ hub20_redis_port }}/{{ hub20_redis_celery_database }}"
