@@ -1,0 +1,19 @@
+[Unit]
+Description={{ hub20_service.description | default('Hub20 Service') }}
+After=syslog.target
+
+[Service]
+EnvironmentFile={{ hub20_environment_file_path }}
+User={{ hub20_user_name }}
+Group={{ hub20_user_name }}
+{% for command in hub20_service.pre_start_commands | default([]) %}ExecStartPre={{ command }}
+{% endfor %}
+ExecStart={{ hub20_service.main_process }}
+Restart=always
+KillSignal=SIGQUIT
+Type={{ hub20_service.process_type | default('simple') }}
+StandardError=syslog
+NotifyAccess=all
+
+[Install]
+WantedBy=multi-user.target

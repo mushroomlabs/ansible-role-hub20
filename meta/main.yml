@@ -1,0 +1,29 @@
+galaxy_info:
+  role_name: hub20
+  description: Installs and sets up all hub20 services in any Debian-based linux distro
+  
+  author: Raphael Lullis
+  company: MushroomLabs
+
+  license: MIT
+  min_ansible_version: 2.4
+
+  platforms:
+    - name: Debian
+      versions:
+        - buster
+        - sid
+        
+    - name: Ubuntu
+      versions:
+        - bionic
+        - cosmic
+        - disco dingo
+        - eoan
+    
+
+  galaxy_tags:
+    - hub20    
+    - ethereum
+    - raiden-network
+    

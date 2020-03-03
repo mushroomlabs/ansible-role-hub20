@@ -1,0 +1,12 @@
+---
+- name: install required system packages
+  tags: hub20, ubuntu, apt
+  apt:
+    name:
+      - build-essential
+      - cython3
+      - gcc
+      - libssl-dev
+      - virtualenv
+      - "{{ hub20_run_python_version }}"
+      - "{{ hub20_run_python_version }}-dev"

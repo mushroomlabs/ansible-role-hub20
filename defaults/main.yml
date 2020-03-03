@@ -1,0 +1,35 @@
+---
+hub20_application_host: 127.0.0.1
+hub20_application_port: 5000
+hub20_blockchain_network_id: 1
+hub20_blockchain_starting_block: 9500000
+hub20_database_host: localhost
+hub20_database_name: hub20
+hub20_database_user: hub20
+hub20_database_port: 5432
+hub20_environment_file_path: /etc/hub20
+hub20_email_backend: django.core.mail.backends.console.EmailBackend
+hub20_email_sender_address: noreply@hub20.example.com
+hub20_pip_package_name: hub20
+hub20_pip_package_state: latest
+hub20_redis_host: localhost
+hub20_redis_port: 6379
+hub20_redis_celery_database: 0
+hub20_redis_cache_database: 1
+hub20_run_debug_mode: false
+hub20_run_python_version: python3.7
+hub20_service_blockchain_sync_enabled: true
+hub20_service_payment_track_enabled: true
+hub20_service_raiden_sync_enabled: true
+hub20_service_web_enabled: true
+hub20_user_name: hub20
+hub20_user_home_path: /srv/hub20
+hub20_web3_provider_uri: http://localhost:8545
+hub20_tracked_tokens:
+  - ETH
+  - WETH
+
+hub20_application_static_folder_path: "{{ hub20_user_home_path }}/static"
+hub20_broker_url: "redis://{{ hub20_redis_host }}:{{ hub20_redis_port }}/{{ hub20_redis_celery_database }}"
+hub20_cache_url: "redis://{{ hub20_redis_host }}:{{ hub20_redis_port }}/{{ hub20_redis_cache_database }}"
+hub20_run_virtualenv_path: "{{ hub20_user_home_path }}/.venv"

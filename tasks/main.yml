@@ -1,0 +1,89 @@
+---
+- include_tasks: Ubuntu.yml
+  when: ansible_distribution == 'Ubuntu'
+
+- name: create user for application
+  tags: hub20, account
+  user:
+    name: "{{ hub20_user_name }}"
+    home: "{{ hub20_user_home_path }}"
+    state: present
+
+- name: create virtualenv and install python packages
+  tags: hub20, packages
+  become: true
+  become_user: "{{ hub20_user_name }}"
+  pip:
+    virtualenv: "{{ hub20_run_virtualenv_path }}"
+    virtualenv_python: "{{ hub20_run_python_version }}"
+    name: "{{ hub20_pip_package_name }}"
+    state: "{{ hub20_pip_package_state }}"
+    extra_args: "{{ hub20_pip_extra_arguments | default('') }}"
+    
+- name: write environment file
+  tags: hub20, environment
+  template:
+    src: templates/hub20.environment.j2
+    dest: "{{ hub20_environment_file_path }}"
+
+- name: write systemd file for web service
+  tags: hub20, systemd, web
+  template:
+    src: templates/hub20_service.systemd.j2
+    dest: /etc/systemd/system/hub20_api.service
+  vars:
+    hub20_service:
+      description: Hub20 Web API
+      pre_start_commands:
+        - "{{ hub20_run_virtualenv_path }}/bin/django-admin migrate"
+        - "{{ hub20_run_virtualenv_path }}/bin/django-admin collectstatic --noinput"
+      main_process: "{{ hub20_run_virtualenv_path }}/bin/uvicorn hub20.api.routing:application --env-file {{ hub20_environment_file_path }} --port {{ hub20_application_port }} --host {{ hub20_application_host }}"
+  when: hub20_service_web_enabled
+
+- name: write systemd file for blockchain sync service
+  tags: hub20, systemd, blockchain_sync
+  template:
+    src: templates/hub20_service.systemd.j2
+    dest: /etc/systemd/system/hub20_job_sync_blockchain.service
+  vars:
+    hub20_service:
+      description: Hub20 Blockchain Sync
+      main_process: "{{ hub20_run_virtualenv_path }}/bin/django-admin sync_blockchain"
+  when: hub20_service_blockchain_sync_enabled
+
+- name: write systemd file for raiden sync service
+  tags: hub20, systemd, raiden_sync
+  template:
+    src: templates/hub20_service.systemd.j2
+    dest: /etc/systemd/system/hub20_job_sync_raiden.service
+  vars:
+    hub20_service:
+      description: Hub20 Raiden Sync
+      main_process: "{{ hub20_run_virtualenv_path }}/bin/django-admin sync_raiden"
+  when: hub20_service_raiden_sync_enabled
+
+- name: write systemd file for tracking pending payments
+  tags: hub20, systemd, track_payments
+  template:
+    src: templates/hub20_service.systemd.j2
+    dest: "/etc/systemd/system/hub20_job_track_payments.service"
+  vars:
+    hub20_service:
+      description: Hub20 Track Payments
+      main_process: "{{ hub20_run_virtualenv_path }}/bin/django-admin track_pending_payments"
+  when: hub20_service_payment_track_enabled
+
+- name: enable systemd services
+  tags: hub20, systemd
+  systemd:
+    name: "{{ item.key }}"
+    enabled: "{{ item.value }}"
+    state: restarted
+    daemon_reload: "{{ item.value }}"
+  vars:
+    services:
+      hub20_api: "{{ hub20_service_web_enabled | bool }}"
+      hub20_job_sync_blockchain: "{{ hub20_service_blockchain_sync_enabled | bool }}"
+      hub20_job_sync_raiden: "{{ hub20_service_raiden_sync_enabled | bool }}"
+      hub20_job_track_payments: "{{ hub20_service_payment_track_enabled | bool }}"
+  loop: "{{ services | dict2items }}"
