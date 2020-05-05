@@ -20,6 +20,16 @@
     state: "{{ hub20_pip_package_state }}"
     extra_args: "{{ hub20_pip_extra_arguments | default('') }}"
 
+- name: ensure folders for resource files exist
+  tags: hub20, filesystem
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ hub20_user_name }}"
+  loop:
+    - "{{ hub20_application_celery_folder_path }}"
+    - "{{ hub20_application_static_folder_path }}"
+
 - name: write environment file
   tags: hub20, environment
   template:
@@ -40,6 +50,35 @@
         - "{{ hub20_run_virtualenv_path }}/bin/django-admin load_tracked_tokens"
       main_process: "{{ hub20_run_virtualenv_path }}/bin/uvicorn hub20.api.routing:application --env-file {{ hub20_environment_file_path }} --port {{ hub20_application_port }} --host {{ hub20_application_host }}"
   when: hub20_service_web_enabled
+
+- name: write systemd file for celery worker
+  tags: hub20, systemd, celery, celery_worker
+  template:
+    src: templates/hub20_service.systemd.j2
+    dest: /etc/systemd/system/hub20_celery_worker.service
+  vars:
+    celery_nodes: "{{ hub20_service_celery_worker_nodes | join(' ') }}"
+    celery_pid_file_path: "{{ hub20_application_celery_folder_path }}/%n.pid"
+    celery_log_file_path: "{{ hub20_application_log_folder_path }}/%n%I.log"
+    celery_options: "--concurrency={{ ansible_processor_count }} --pidfile={{ celery_pid_file_path }} --logfile={{ celery_log_file_path }} -l info"
+    hub20_service:
+      description: Hub20 Celery Worker
+      main_process: "{{ hub20_run_virtualenv_path }}/bin/celery multi start {{ celery_nodes }} -A hub20.api {{ celery_options }}"
+      stop_command: "{{ hub20_run_virtualenv_path }}/bin/celery multi stopwait {{ celery_nodes }} --pidfile={{ celery_pid_file_path }}"
+      reload_command: "{{ hub20_run_virtualenv_path }}/bin/celery multi restart {{ celery_nodes }} -A hub20.api {{ celery_options }}"
+      process_type: forking
+  when: hub20_service_celery_worker_enabled
+
+- name: write systemd file for celery beat
+  tags: hub20, systemd, celery, celery_beat
+  template:
+    src: templates/hub20_service.systemd.j2
+    dest: /etc/systemd/system/hub20_celery_beat.service
+  vars:
+    hub20_service:
+      description: Hub20 Celery Beat
+      main_process: "{{ hub20_run_virtualenv_path }}/bin/celery beat -A hub20.api -l info -s {{ hub20_application_celery_beat_database_file_path }} --pidfile={{ hub20_application_celery_folder_path }}/celerybeat.pid"
+  when: hub20_service_celery_beat_enabled
 
 - name: write systemd file for blockchain sync service
   tags: hub20, systemd, blockchain_sync
@@ -75,7 +114,7 @@
   when: hub20_service_payment_track_enabled
 
 - name: enable systemd services
-  tags: hub20, systemd
+  tags: hub20, systemd, web, celery
   systemd:
     name: "{{ item.key }}"
     enabled: "{{ item.value }}"
@@ -84,6 +123,8 @@
   vars:
     services:
       hub20_api: "{{ hub20_service_web_enabled | bool }}"
+      hub20_celery_worker:  "{{ hub20_service_celery_worker_enabled | bool }}"
+      hub20_celery_beat:  "{{ hub20_service_celery_beat_enabled | bool }}"
       hub20_job_sync_blockchain: "{{ hub20_service_blockchain_sync_enabled | bool }}"
       hub20_job_sync_raiden: "{{ hub20_service_raiden_sync_enabled | bool }}"
       hub20_job_track_payments: "{{ hub20_service_payment_track_enabled | bool }}"
