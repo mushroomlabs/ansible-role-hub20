@@ -4,13 +4,17 @@ After=syslog.target
 
 [Service]
 EnvironmentFile={{ hub20_environment_file_path }}
+{% if hub20_service.working_directory_path is defined %}WorkingDirectory={{ hub20_service.working_directory_path }}
+{% endif %}
 User={{ hub20_user_name }}
 Group={{ hub20_user_name }}
 {% for command in hub20_service.pre_start_commands | default([]) %}ExecStartPre={{ command }}
 {% endfor %}
 ExecStart={{ hub20_service.main_process }}
-{% if hub20_service.stop_command is defined %}ExecStop={{ hub20_service.stop_command }}{% endif %}
-{% if hub20_service.reload_command is defined %}ExecReload={{ hub20_service.reload_command }}{% endif %}
+{% if hub20_service.stop_command is defined %}ExecStop={{ hub20_service.stop_command }}
+{% endif %}
+{% if hub20_service.reload_command is defined %}ExecReload={{ hub20_service.reload_command }}
+{% endif %}
 Restart=always
 KillSignal=SIGQUIT
 Type={{ hub20_service.process_type | default('simple') }}

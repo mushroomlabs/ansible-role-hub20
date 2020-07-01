@@ -11,7 +11,7 @@ Requirements
 This role is only responsible for the installation and setup of the following hub20 services:
 
  - API: the REST API (a django-application, served by uvicorn)
- - blockchain sync: a background job that pull all relevant blockchain transactions to the application database
+ - web3 listen events: a background job that will listen to relevant web3 events (i.e, ETH/ERC20 transfers to accounts hold by our services, raiden channels being opened/closed, whatever else the user defines)
  - raiden sync: a background job to collect and process all events from your Raiden instance
  - track pending payments: a background job that checks pending
    transactions targeting any of the accounts of the Hub20 internal
@@ -43,8 +43,7 @@ Role Variables
  - `hub20_redis_cache_database`: (default _1_)
  - `hub20_run_debug_mode`: (default _false_)
  - `hub20_run_python_version`: (default _python3.7_)
- - `hub20_service_blockchain_sync_enabled`: (default _true_)
- - `hub20_service_payment_track_enabled`: (default _true_)
+ - `hub20_service_web3_event_listener_enabled`: (default _true_)
  - `hub20_service_raiden_sync_enabled`: (default _true_)
  - `hub20_service_web_enabled`: (default _true_)
  - `hub20_user_name`: (default _hub20_)

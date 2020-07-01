@@ -3,7 +3,7 @@ HUB20_BLOCKCHAIN_NETWORK_ID={{ hub20_blockchain_network_id | int }}
 HUB20_BROKER_URL={{ hub20_broker_url }}
 HUB20_CACHE_BACKEND=django_redis.cache.RedisCache
 HUB20_CACHE_LOCATION={{ hub20_cache_url }}
-HUB20_CHANNEL_LAYER_HOST=redis
+HUB20_CHANNEL_LAYER_HOST={{ hub20_channel_layer_host }}
 HUB20_DATABASE_HOST={{ hub20_database_host }}
 HUB20_DATABASE_PORT={{ hub20_database_port | int }}
 HUB20_DATABASE_NAME={{ hub20_database_name }}
@@ -16,3 +16,11 @@ HUB20_STATIC_ROOT={{ hub20_application_static_folder_path }}
 HUB20_BLOCKCHAIN_STARTING_BLOCK={{ hub20_blockchain_starting_block | int }}
 HUB20_TRACKED_TOKENS={{ ','.join(hub20_tracked_tokens) }}
 WEB3_PROVIDER_URI={{ hub20_web3_provider_uri }}
+
+{% if hub20_ethereum_hd_wallet_root_key is defined -%}
+HUB20_ETHEREUM_ACCOUNT_MODEL=ethereum_money.HierarchicalDeterministicWallet
+HUB20_ETHEREUM_HD_WALLET_ROOT_KEY={{ hub20_ethereum_hd_wallet_root_key }}
+{% elif hub20_ethereum_hd_wallet_mnemonic is defined -%}
+HUB20_ETHEREUM_ACCOUNT_MODEL=ethereum_money.HierarchicalDeterministicWallet
+HUB20_ETHEREUM_HD_WALLET_MNEMONIC={{ hub20_ethereum_hd_wallet_mnemonic }}
+{%- endif %}

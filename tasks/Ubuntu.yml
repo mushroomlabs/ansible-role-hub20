@@ -10,3 +10,12 @@
       - virtualenv
       - "{{ hub20_run_python_version }}"
       - "{{ hub20_run_python_version }}-dev"
+
+
+- name: install git
+  become: true
+  apt:
+    state: present
+    name:
+      - git
+  when: hub20_install_from_source
