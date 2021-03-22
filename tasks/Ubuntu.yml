@@ -1,6 +1,7 @@
 ---
 - name: install required system packages
   tags: hub20, ubuntu, apt
+  become: true
   apt:
     name:
       - build-essential
@@ -11,6 +12,13 @@
       - "{{ hub20_run_python_version }}"
       - "{{ hub20_run_python_version }}-dev"
 
+- name: install libffi
+  tags: hub20, ubuntu, apt
+  become: true
+  apt:
+    name:
+      - libffi-dev
+  when: ansible_distribution_major_version == "20" and ansible_distribution_minor_version == "04"
 
 - name: install git
   become: true

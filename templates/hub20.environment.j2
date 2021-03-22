@@ -17,10 +17,24 @@ HUB20_BLOCKCHAIN_STARTING_BLOCK={{ hub20_blockchain_starting_block | int }}
 HUB20_TRACKED_TOKENS={{ ','.join(hub20_tracked_tokens) }}
 WEB3_PROVIDER_URI={{ hub20_web3_provider_uri }}
 
+{% if hub20_application_api_cors_enabled %}
+HUB20_CORS_HEADERS_ENABLED=true
+{%- endif %}
+
 {% if hub20_ethereum_hd_wallet_root_key is defined -%}
 HUB20_ETHEREUM_ACCOUNT_MODEL=ethereum_money.HierarchicalDeterministicWallet
 HUB20_ETHEREUM_HD_WALLET_ROOT_KEY={{ hub20_ethereum_hd_wallet_root_key }}
 {% elif hub20_ethereum_hd_wallet_mnemonic is defined -%}
 HUB20_ETHEREUM_ACCOUNT_MODEL=ethereum_money.HierarchicalDeterministicWallet
-HUB20_ETHEREUM_HD_WALLET_MNEMONIC={{ hub20_ethereum_hd_wallet_mnemonic }}
+HUB20_ETHEREUM_HD_WALLET_MNEMONIC="{{ hub20_ethereum_hd_wallet_mnemonic }}"
+{%- endif %}
+
+{% if hub20_application_raiden_enabled and hub20_application_raiden_account_private_key is defined %}
+HUB20_RAIDEN_ENABLED=true
+HUB20_RAIDEN_ACCOUNT_PRIVATE_KEY={{ hub20_application_raiden_account_private_key }}
+RAIDEN_API_ADDRESS={{ hub20_application_raiden_url }}
+RAIDEN_ACCEPT_DISCLAIMER=true
+RAIDEN_ROUTING_MODE=pfs
+RAIDEN_MATRIX_SERVER={{ hub20_application_raiden_matrix_url }}
+RAIDEN_PATHFINDING_SERVICE_ADDRESS={{ hub20_application_raiden_pfs_url }}
 {%- endif %}

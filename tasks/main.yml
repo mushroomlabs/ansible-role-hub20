@@ -50,8 +50,7 @@
       pre_start_commands:
         - "{{ hub20_run_virtualenv_path }}/bin/django-admin migrate"
         - "{{ hub20_run_virtualenv_path }}/bin/django-admin collectstatic --noinput"
-        - "{{ hub20_run_virtualenv_path }}/bin/django-admin load_tracked_tokens"
-      main_process: "{{ hub20_run_virtualenv_path }}/bin/uvicorn hub20.api.routing:application --env-file {{ hub20_environment_file_path }} --port {{ hub20_application_port }} --host {{ hub20_application_host }}"
+      main_process: "{{ hub20_run_virtualenv_path }}/bin/uvicorn hub20.api.asgi:application --env-file {{ hub20_environment_file_path }} --port {{ hub20_application_port }} --host {{ hub20_application_host }}"
   when: hub20_service_web_enabled
 
 - name: write systemd file for celery worker
@@ -62,7 +61,7 @@
   vars:
     hub20_service:
       description: Hub20 Celery Worker
-      main_process: "{{ hub20_run_virtualenv_path }}/bin/celery worker -A hub20.api -l info"
+      main_process: "{{ hub20_run_virtualenv_path }}/bin/celery -A hub20.api worker -l info"
       working_directory_path: "{{ hub20_run_virtualenv_path }}"
   when: hub20_service_celery_worker_enabled
 
@@ -74,30 +73,30 @@
   vars:
     hub20_service:
       description: Hub20 Celery Beat
-      main_process: "{{ hub20_run_virtualenv_path }}/bin/celery beat -A hub20.api -l info -s {{ hub20_application_celery_beat_database_file_path }} --pidfile={{ hub20_application_celery_folder_path }}/celerybeat.pid"
+      main_process: "{{ hub20_run_virtualenv_path }}/bin/celery -A hub20.api beat -l info -s {{ hub20_application_celery_beat_database_file_path }} --pidfile={{ hub20_application_celery_folder_path }}/celerybeat.pid"
   when: hub20_service_celery_beat_enabled
 
-- name: write systemd file for web3 listener service
-  tags: hub20, systemd, web3_listener
+- name: write systemd file for event listeners service
+  tags: hub20, systemd, listeners
   template:
     src: templates/hub20_service.systemd.j2
-    dest: /etc/systemd/system/hub20_job_listen_web3_events.service
+    dest: /etc/systemd/system/hub20_job_listen_events.service
   vars:
     hub20_service:
       description: Hub20 Web3 Event Listener
       main_process: "{{ hub20_run_virtualenv_path }}/bin/django-admin run_event_listeners"
-  when: hub20_service_web3_event_listener_enabled
+  when: hub20_service_event_listener_enabled
 
-- name: write systemd file for raiden sync service
-  tags: hub20, systemd, raiden_sync
+- name: write systemd file for raiden service
+  tags: hub20, systemd, raiden
   template:
     src: templates/hub20_service.systemd.j2
-    dest: /etc/systemd/system/hub20_job_sync_raiden.service
+    dest: /etc/systemd/system/hub20_raiden.service
   vars:
     hub20_service:
       description: Hub20 Raiden Sync
-      main_process: "{{ hub20_run_virtualenv_path }}/bin/django-admin sync_raiden"
-  when: hub20_service_raiden_sync_enabled
+      main_process: "{{ hub20_run_virtualenv_path }}/bin/django-admin run_raiden"
+  when: hub20_service_raiden_enabled
 
 - name: enable systemd services
   tags: hub20, systemd, web, celery
@@ -111,6 +110,6 @@
       hub20_api: "{{ hub20_service_web_enabled | bool }}"
       hub20_celery_worker:  "{{ hub20_service_celery_worker_enabled | bool }}"
       hub20_celery_beat:  "{{ hub20_service_celery_beat_enabled | bool }}"
-      hub20_job_listen_web3_events: "{{ hub20_service_web3_event_listener_enabled | bool }}"
-      hub20_job_sync_raiden: "{{ hub20_service_raiden_sync_enabled | bool }}"
+      hub20_job_listen_events: "{{ hub20_service_event_listener_enabled | bool }}"
+      hub20_raiden: "{{ hub20_service_raiden_enabled | bool }}"
   loop: "{{ services | dict2items }}"

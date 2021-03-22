@@ -1,6 +1,13 @@
 ---
 hub20_application_host: 127.0.0.1
 hub20_application_port: 5000
+hub20_application_api_cors_enabled: true
+hub20_application_raiden_url: http://localhost:5001
+hub20_application_raiden_enabled: true
+hub20_application_raiden_monitoring_enabled: true
+hub20_application_raiden_routing_mode: pfs
+hub20_application_raiden_matrix_url: https://transport.demo001.env.raiden.network
+hub20_application_raiden_pfs_url: https://pfs.demo001.env.raiden.network
 hub20_blockchain_network_id: 1
 hub20_blockchain_starting_block: 9500000
 hub20_database_host: localhost
@@ -21,8 +28,8 @@ hub20_run_debug_mode: false
 hub20_run_python_version: python3.7
 hub20_service_celery_worker_nodes:
   - w1
-hub20_service_web3_event_listener_enabled: true
-hub20_service_raiden_sync_enabled: true
+hub20_service_event_listener_enabled: true
+hub20_service_raiden_enabled: true
 hub20_service_web_enabled: true
 hub20_service_celery_worker_enabled: true
 hub20_service_celery_beat_enabled: true
